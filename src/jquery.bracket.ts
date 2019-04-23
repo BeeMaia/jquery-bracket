@@ -45,6 +45,7 @@ interface BracketOptions<TTeam, TScore, TMData, TUData> {
     data: BracketInitData<TTeam, TScore, TMData>,
     userData: TUData
   ) => void;
+  getMatchInfo?:(data:any) => void;
   userData?: TUData;
   decorator: BracketDecorator<TTeam, TScore>;
   skipConsolationRound?: boolean;
@@ -354,6 +355,7 @@ interface BracketOptions<TTeam, TScore, TMData, TUData> {
       data: BracketInitData<TTeam, TScore, TMData>,
       userData: TUData | undefined
     ) => void;
+    getMatchInfo?:(data:any) => void;
     userData: TUData | undefined;
     decorator: BracketDecorator<TTeam, TScore>;
     skipConsolationRound: boolean;
@@ -1427,7 +1429,7 @@ interface BracketOptions<TTeam, TScore, TMData, TUData> {
           function editor() {
             span.unbind();
 
-            const initialScore = !isNumber(team.score.get()) ? "0" : span.text();
+            const initialScore = team.score.isEmpty() || !isNumber(team.score.get()) ? "0" : span.text();
             const input = $('<input type="text">');
 
             input.val(initialScore);
@@ -1458,12 +1460,15 @@ interface BracketOptions<TTeam, TScore, TMData, TUData> {
               }
             });
             input.blur(() => {
+              if (opts.getMatchInfo)
+                opts.getMatchInfo(match);
+              
               let val = opts.extension.evaluateScore(
                 input.val(),
                 team.score.toNull()
               );
               if (val === null) {
-                val = team.score.get();
+                val = team.score.isEmpty() ? "": team.score.get();
               }
 
               span.html(val);
@@ -1539,7 +1544,7 @@ interface BracketOptions<TTeam, TScore, TMData, TUData> {
       /* todo: would be nice to have in preload check, maybe too much work */
       if (
         (!match.a.name || !match.b.name) &&
-        (isNumber(match.a.score.get()) || isNumber(match.b.score.get()))
+        (isNumber(match.a.score) || isNumber(match.b.score))
       ) {
         console.warn(
           `ERROR IN SCORE DATA: ${match.a.source().name}: ${match.a.score}, ${
@@ -2091,6 +2096,7 @@ interface BracketOptions<TTeam, TScore, TMData, TUData> {
         ? 40
         : getPositiveOrZero(input.roundMargin),
       save: input.save,
+      getMatchInfo: input.getMatchInfo,
       scoreWidth: !input.hasOwnProperty("scoreWidth")
         ? 30
         : getPositiveOrZero(input.scoreWidth),
