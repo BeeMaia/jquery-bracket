@@ -1427,7 +1427,7 @@ interface BracketOptions<TTeam, TScore, TMData, TUData> {
           function editor() {
             span.unbind();
 
-            const initialScore = !isNumber(team.score) ? "0" : span.text();
+            const initialScore = !isNumber(team.score.get()) ? "0" : span.text();
             const input = $('<input type="text">');
 
             input.val(initialScore);
@@ -1463,7 +1463,7 @@ interface BracketOptions<TTeam, TScore, TMData, TUData> {
                 team.score.toNull()
               );
               if (val === null) {
-                val = team.score;
+                val = team.score.get();
               }
 
               span.html(val);
@@ -1539,7 +1539,7 @@ interface BracketOptions<TTeam, TScore, TMData, TUData> {
       /* todo: would be nice to have in preload check, maybe too much work */
       if (
         (!match.a.name || !match.b.name) &&
-        (isNumber(match.a.score) || isNumber(match.b.score))
+        (isNumber(match.a.score.get()) || isNumber(match.b.score.get()))
       ) {
         console.warn(
           `ERROR IN SCORE DATA: ${match.a.source().name}: ${match.a.score}, ${
